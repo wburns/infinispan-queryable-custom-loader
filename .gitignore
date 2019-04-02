@@ -26,3 +26,6 @@ build.metadata
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Maven settings ignored as it can contain user specific info
+maven-settings.xml

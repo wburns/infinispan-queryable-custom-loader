@@ -1,2 +1,7 @@
 = infinispan-queryable-custom-loader
 Creating a Custom Loader that also provides Queryable object in DataGrid
+
+== Steps
+
+. (Optional) Configure a maven-settings.xml to point to a local repository if needed.
+The repository comes with an empty one (example-maven-settings.xml) that can be used by replacing the directory location of the location on the filesystem.
