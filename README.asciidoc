@@ -72,3 +72,89 @@ NOTE: The dependency is marked as provided scope, since the Infinispan server wi
 ```
 +
 NOTE: The dependency is marked as provided scope, this is due to this dependency only being required for compile and is not used at runtime
++
+. Setup configuration classes, allows for parameters via xml
+.. We start by removing some redundant classes. These are only useful in embedded mode, which we are using server
+... Attribute.java
+... CustomStoreConfigurationParser.java
+... Element.java
+.. Now the various configuration parameters need to be added to the following classes
++
+Here is an example of adding a name and age to our configuration
++
+... CustomStoreConfiguration.java
++
+```java
+@BuiltBy(CustomStoreConfigurationBuilder.class)
+@ConfigurationFor(CustomCacheLoader.class)
+public class CustomStoreConfiguration extends AbstractStoreConfiguration {
+
+    static final AttributeDefinition<String> NAME = AttributeDefinition.builder("name", null, String.class).immutable().build();
+    static final AttributeDefinition<Integer> AGE = AttributeDefinition.builder("age", 0, Integer.class).immutable().build();
+
+    private final Attribute<String> name;
+    private final Attribute<Integer> age;
+
+    public static AttributeSet attributeDefinitionSet() {
+        return new AttributeSet(CustomStoreConfiguration.class, AbstractStoreConfiguration.attributeDefinitionSet(), NAME, AGE);
+    }
+
+    public CustomStoreConfiguration(AttributeSet attributes, AsyncStoreConfiguration async, SingletonStoreConfiguration singletonStore) {
+        super(attributes, async, singletonStore);
+        name = attributes.attribute(NAME);
+        age = attributes.attribute(AGE);
+    }
+
+    public String name() {
+        return name.get();
+    }
+
+    public Integer age() {
+        return age.get();
+    }
+}
+```
+... CustomStoreConfigurationBuilder.java
++
+```java
+public class CustomStoreConfigurationBuilder extends AbstractStoreConfigurationBuilder<CustomStoreConfiguration, CustomStoreConfigurationBuilder>{
+
+    public CustomStoreConfigurationBuilder(
+          PersistenceConfigurationBuilder builder) {
+        super(builder, CustomStoreConfiguration.attributeDefinitionSet());
+    }
+
+    public CustomStoreConfigurationBuilder name(String name) {
+        attributes.attribute(NAME).set(name);
+        return this;
+    }
+
+    public CustomStoreConfigurationBuilder age(int age) {
+        attributes.attribute(AGE).set(age);
+        return this;
+    }
+
+    @Override
+    public CustomStoreConfiguration create() {
+        return new CustomStoreConfiguration(attributes.protect(), async.create(), singletonStore.create());
+    }
+
+    @Override
+    public CustomStoreConfigurationBuilder self() {
+        return this;
+    }
+}
+```
++
+.. The CustomCacheLoader can inject the configuration in the init method
++
+This can then be used in an invocation later
++
+```java
+    CustomStoreConfiguration config;
+   
+    @Override
+    public void init(InitializationContext ctx) {
+        config = ctx.getConfiguration();
+    }
+```

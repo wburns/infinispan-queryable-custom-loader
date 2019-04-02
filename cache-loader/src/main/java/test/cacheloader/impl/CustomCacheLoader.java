@@ -9,6 +9,8 @@ import org.kohsuke.MetaInfServices;
 @MetaInfServices
 @ConfiguredBy(CustomStoreConfiguration.class)
 public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
+
+    CustomStoreConfiguration config;
    
     @Override
     public void init(InitializationContext ctx) {
@@ -23,6 +25,7 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
          * - a ByteBufferFactory which needs to be used to construct ByteBuffers
          * - a MarshalledEntryFactory which needs to be used to construct entries from the data retrieved by the loader 
          */
+        config = ctx.getConfiguration();
     }
 
     @Override
@@ -32,7 +35,6 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
          * is complete and the loader can perform operations such as opening a connection to the external storage,
          * initialize internal data structures, etc.
          */
-        
     }
 
     @Override
