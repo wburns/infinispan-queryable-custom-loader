@@ -75,6 +75,30 @@
                <encoding>UTF-8</encoding>
             </configuration>
          </plugin>
+
+         <!-- This plugin will pull all the non provided scoped dependencies into a resulting jar, allowing for
+              all the classes to be available to the deployment -->
+         <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>single</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+               </descriptorRefs>
+               <archive>
+                  <manifestEntries>
+                     <Dependencies>org.infinispan.core:jdg-7.3 services, org.infinispan.protostream:jdg-7.3 services</Dependencies>
+                  </manifestEntries>
+               </archive>
+            </configuration>
+         </plugin>
       </plugins>
    </build>
 

@@ -158,3 +158,93 @@ This can then be used in an invocation later
         config = ctx.getConfiguration();
     }
 ```
++
+. Add user classes required for retrieving from the custom store and handle serialization
+.. Change the pom.xml to include user dependencies in resulting jar
++
+This also includes manifest entries to expose the required modules to the loader (ie. core and protostream)
++
+```xml
+         <!-- This plugin will pull all the non provided scoped dependencies into a resulting jar, allowing for
+              all the classes to be available to the deployment -->
+         <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>single</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+               </descriptorRefs>
+               <archive>
+                  <manifestEntries>
+                     <Dependencies>org.infinispan.core:jdg-7.3 services, org.infinispan.protostream:jdg-7.3 services</Dependencies>
+                  </manifestEntries>
+               </archive>
+            </configuration>
+         </plugin>
+```
++
+This will create a new jar in the target directory named as cache-loader-1.0-SNAPSHOT-jar-with-dependencies.jar which will contain
+all dependencies that are scoped as compile (default scope).
++
+.. Add dependencies of user actual classes
++
+This can be done a couple different ways, however the first method is the recommended way to prevent duplication of code across projects.
++
+... The preferred method of adding user classes is just to add them as a dependency in the pom.xml directly
++
+The following is just an example and should be replaced with user specific modules and versions
++
+```xml
+      <dependency>
+         <groupId>some.organization</groupId>
+         <artifactId>domain-objects</artifactId>
+         <version>${version.some.organization}</version>
+      </dependency>
+      <dependency>
+         <groupId>some.organization</groupId>
+         <artifactId>domain-access-objects</artifactId>
+         <version>${version.some.organization}</version>
+      </dependency>
+
+```
++
+These dependencies its transitive dependencies will automatically be added to the resulting with-dependencies jar.
+... It is also possible to add the .java files directly to the project
++
+This project will use this approach since it is simpler as an example and shows the actual user classes
++
+This is a contrived example just to show interactions with the loader.
++
+```java
+public class Person {
+
+    private final long id;
+    private final String name;
+    private final Integer age;
+
+    public Person(long id, String name, Integer age) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+}
+```
