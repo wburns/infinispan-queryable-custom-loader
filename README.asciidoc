@@ -1,7 +1,31 @@
 = infinispan-queryable-custom-loader
 Creating a Custom Loader that also provides Queryable object in DataGrid
 
+This repository contains step by step instructions of how to get a custom loader working with querying. Each step is accompanied by a related commit that shows progress.
+
+NOTE: This project is not meant to be checked out, but to create a project for yourself and can follow step by step
+
 == Steps
 
 . (Optional) Configure a maven-settings.xml to point to a local repository if needed.
 The repository comes with an empty one (example-maven-settings.xml) that can be used by replacing the directory location of the location on the filesystem.
+All subsequent commands will assume this is done, you can remove all subsequent "-s maven-settings.xml" references if this
+was not done.
+. Generate the store archetypes (substitute the version as appropriate). Note the verison is not the same as DataGrid, but rather
+specific to the archetype. As of this writing the current version is 1.0.25.
++
+```
+mvn -s maven-settings.xml archetype:generate \
+     -DarchetypeGroupId=org.infinispan.archetypes \
+     -DarchetypeArtifactId=store-archetype  \
+     -DarchetypeVersion=<version>
+```
++
+This command will eventually prompt the user for a groupId, artifactId, project version and package. Please populate as appropriate for the usage.
+This example will use test, cacheloader, 1.0-SNAPSHOT and test.cacheloader.impl respectively.
++
+You should now have a cacheloader directory in the current directory that contains a pom.xml and several children modules, one per type of custom loader/store.
+To simplify the project all the contents of cacheloader will be moved to the root directory.
+In this example we will be using the cache-loader project moving forward.
++
+NOTE: You may notice that the generated projects do not compile, we will be fixing this in the next step
