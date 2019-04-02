@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-bom</artifactId>
+      <version>9.4.11.Final</version>
+   </parent>
+
    <groupId>test</groupId>
    <artifactId>cacheloader</artifactId>
    <version>1.0-SNAPSHOT</version>
@@ -9,7 +15,6 @@
    <description>Archetype project for building custom cache stores for use within Infinispan</description>
 
    <properties>
-      <version.metainf>1.7</version.metainf>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
    </properties>
 
@@ -17,12 +22,18 @@
       <dependency>
          <groupId>org.kohsuke.metainf-services</groupId>
          <artifactId>metainf-services</artifactId>
-         <version>${version.metainf}</version>
+         <version>${version.metainf-services}</version>
+         <scope>provided</scope>
       </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-embedded</artifactId>
-         <version>${version.infinispan}</version>
+         <artifactId>infinispan-core</artifactId>
+         <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.infinispan.protostream</groupId>
+         <artifactId>protostream</artifactId>
+         <scope>provided</scope>
       </dependency>
    </dependencies>
 

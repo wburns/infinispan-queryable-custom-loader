@@ -29,3 +29,46 @@ To simplify the project all the contents of cacheloader will be moved to the roo
 In this example we will be using the cache-loader project moving forward.
 +
 NOTE: You may notice that the generated projects do not compile, we will be fixing this in the next step
++
+. Adding DataGrid dependencies to the base project
+.. Configure Infinispan bom to parent pom
++
+Add the following snippet to the pom.xml in the root directory replacing 9.4.11.Final with the appropriate version
++
+```xml
+   <parent>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-bom</artifactId>
+      <version>9.4.11.Final</version>
+   </parent>
+```
+.. Replace Infinispan embedded dependency with core and add protostream dependency
++
+```xml
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-core</artifactId>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.infinispan.protostream</groupId>
+         <artifactId>protostream</artifactId>
+         <scope>provided</scope>
+      </dependency>
+
+```
++
+NOTE: The dependency is marked as provided scope, since the Infinispan server will provide those classes automatically and aren't needed in a built jar.
+.. (Optional) Remplace metainf version to use bom. Remove version.metainf property.
++
+```xml
+      <dependency>
+         <groupId>org.kohsuke.metainf-services</groupId>
+         <artifactId>metainf-services</artifactId>
+         <version>${version.metainf-services}</version>
+         <scope>provided</scope>
+      </dependency>
+```
++
+NOTE: The dependency is marked as provided scope, this is due to this dependency only being required for compile and is not used at runtime
