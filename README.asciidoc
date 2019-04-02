@@ -1,0 +1,2 @@
+= infinispan-queryable-custom-loader
+Creating a Custom Loader that also provides Queryable object in DataGrid
