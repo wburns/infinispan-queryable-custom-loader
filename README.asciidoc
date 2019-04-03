@@ -268,3 +268,91 @@ NOTE: Only initializing needed objects from the InitializationContext should be 
         marshalledEntryFactory = ctx.getMarshalledEntryFactory();
     }
 ```
+. (Optional) Configuring Protostream marshalling
++
+This is needed if the entries loaded from the cache loader can be queryable
++
+.. We start by defining the protobuf schema for the class(es) that will be stored in the Data Grid
++
+.person.proto
+[source,protobuf]
+----
+package test;
+
+message Person {
+  required int64 id = 1;
+  optional string name = 2;
+  optional int32 age = 3;
+}
+----
++
+Make sure to note the package and message name (ie. test.Person) this is used later
++
+.. Next we need to write the actual marshaller for the class
++
+.PersonMarshaller.java
+[source,java]
+----
+public class PersonMarshaller implements MessageMarshaller<Person> {
+   @Override
+   public Person readFrom(ProtoStreamReader reader) throws IOException {
+      Long id = reader.readLong("id");
+      String name = reader.readString("name");
+      Integer age = reader.readInt("age");
+      return new Person(id, name, age);
+   }
+
+   @Override
+   public void writeTo(ProtoStreamWriter writer, Person person) throws IOException {
+      writer.writeLong("id", person.getId());
+      writer.writeString("name", person.getName());
+      writer.writeLong("age", person.getAge());
+   }
+
+   @Override
+   public Class<? extends Person> getJavaClass() {
+      return Person.class;
+   }
+
+   @Override
+   public String getTypeName() {
+      return "test.Person";
+   }
+}
+----
++
+The `getTypeName` method must return the String value from the protobuf schema (ie. <package name>.<message name>).
++
+.. Create the protostream serialization context on startup
++
+With the schema and marshaller we can now setup the serialization context that will be used to convert the
+user object to the proper storage format.
++
+.CustomCacheLoader.java
+[source,java]
+----
+    SerializationContext ctx;
+
+    private static final String PROTOBUF_DEFINITION_RESOURCE = "person.proto";
+
+    @Override
+    public void start() {
+        ctx = ProtobufUtil.newSerializationContext();
+
+        try {
+            ctx.registerProtoFiles(FileDescriptorSource.fromResources(CustomCacheLoader.class.getClassLoader(),
+                  PROTOBUF_DEFINITION_RESOURCE));
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+
+        ctx.registerMarshaller(new PersonMarshaller());
+    }
+
+    @Override
+    public void stop() {
+        ctx = null;
+    }
+----
++
+NOTE: We have to pass the ClassLoader of the CustomCacheLoader so it can access all the classes in the custom loader jar.

@@ -1,13 +1,20 @@
 package test.cacheloader.impl;
 
+import java.io.IOException;
+
+import org.infinispan.commons.CacheException;
 import org.infinispan.commons.configuration.ConfiguredBy;
 import org.infinispan.commons.io.ByteBufferFactory;
 import org.infinispan.marshall.core.MarshalledEntry;
 import org.infinispan.marshall.core.MarshalledEntryFactory;
 import org.infinispan.persistence.spi.CacheLoader;
 import org.infinispan.persistence.spi.InitializationContext;
+import org.infinispan.protostream.FileDescriptorSource;
+import org.infinispan.protostream.ProtobufUtil;
 import org.infinispan.protostream.SerializationContext;
 import org.kohsuke.MetaInfServices;
+
+import test.domain.PersonMarshaller;
 
 @MetaInfServices
 @ConfiguredBy(CustomStoreConfiguration.class)
@@ -16,6 +23,10 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
     ByteBufferFactory byteBufferFactory;
     MarshalledEntryFactory marshalledEntryFactory;
     CustomStoreConfiguration config;
+
+    SerializationContext ctx;
+
+    private static final String PROTOBUF_DEFINITION_RESOURCE = "person.proto";
    
     @Override
     public void init(InitializationContext ctx) {
@@ -42,6 +53,16 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
          * is complete and the loader can perform operations such as opening a connection to the external storage,
          * initialize internal data structures, etc.
          */
+        ctx = ProtobufUtil.newSerializationContext();
+
+        try {
+            ctx.registerProtoFiles(FileDescriptorSource.fromResources(CustomCacheLoader.class.getClassLoader(),
+                  PROTOBUF_DEFINITION_RESOURCE));
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+
+        ctx.registerMarshaller(new PersonMarshaller());
     }
 
     @Override
@@ -50,6 +71,7 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
          * This method will be invoked by the PersistenceManager to stop the CacheLoader. The CacheLoader should close any
          * connections to the external storage and perform any needed cleanup.
          */
+        ctx = null;
     }
 
     @Override
