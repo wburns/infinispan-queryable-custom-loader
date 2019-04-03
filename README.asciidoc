@@ -416,3 +416,29 @@ NOTE: This section is not included in the commit since it is done in an external
 +
 This assumes the client is using ProtoStreamMarshaller and sets the encoding type of store objects as protostream.
 This is useful as we can convert between this storage type and others quite easily.
++
+. (Testing) Access the data from REST end point
++
+Now that we have the loader present and have the media type set we can upload the proto schema to the server
+and access the data idirectly via REST (Requires user realm authentication)
++
+.. Upload proto schema via REST
++
+----
+curl -u <user>:<pass> -X POST --data-binary @./person.proto http://127.0.0.1:8080/rest/___protobuf_metadata/person.proto
+----
++
+.. Invoke a REST end point to retrieve the user data
++
+We have to specify the key content type as String won't work
++
+----
+curl -u <user>:<pass> --header "Key-Content-Type: application/x-java-object;type=java.lang.Long" http://127.0.0.1:8080/rest/default/3
+
+{
+   "_type": "test.Person",
+   "id": "3",
+   "name": "Joe",
+   "age": 32
+}
+----
