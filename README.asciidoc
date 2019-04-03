@@ -389,3 +389,30 @@ The concepts of it can be applied to all the other methods though.
 ----
 +
 With that done, the loader should be ready to go!
++
+. Deploy and configure the loader in the Server
++
+NOTE: This section is not included in the commit since it is done in an external system
++
+.. Copy the `cache-loader-1.0-SNAPSHOT-jar-with-dependencies.jar` file to the Data Grid `standalone/deployments` folder
+.. Change the standalone.xml/clustered.xml to use the loader
++
+.clustered.xml
+[source,xml]
+----
+<distributed-cache name="default">
+  <encoding>
+    <key media-type="application/x-protostream"/>
+    <value media-type="application/x-protostream"/>
+  </encoding>
+  <persistence>
+    <store class="test.cacheloader.impl.CustomCacheLoader">
+      <property name="name">Joe</property>
+      <property name="age">32</property>
+    </store>
+  </persistence>
+</distributed-cache>
+----
++
+This assumes the client is using ProtoStreamMarshaller and sets the encoding type of store objects as protostream.
+This is useful as we can convert between this storage type and others quite easily.
