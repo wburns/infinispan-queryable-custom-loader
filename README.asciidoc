@@ -248,3 +248,23 @@ public class Person {
     }
 }
 ```
+. Initialize the instance variables in the cache loader
++
+The cache loader methods will need some shared variables to work properly.
+These include things such as the marshalledEntryFactory, byteBufferFactory and configuration
+of the loader as done before.
++
+NOTE: Only initializing needed objects from the InitializationContext should be done in the init method
++
+```java
+    ByteBufferFactory byteBufferFactory;
+    MarshalledEntryFactory marshalledEntryFactory;
+    CustomStoreConfiguration config;
+
+    @Override
+    public void init(InitializationContext ctx) {
+        config = ctx.getConfiguration();
+        byteBufferFactory = ctx.getByteBufferFactory();
+        marshalledEntryFactory = ctx.getMarshalledEntryFactory();
+    }
+```

@@ -1,15 +1,20 @@
 package test.cacheloader.impl;
 
 import org.infinispan.commons.configuration.ConfiguredBy;
+import org.infinispan.commons.io.ByteBufferFactory;
 import org.infinispan.marshall.core.MarshalledEntry;
+import org.infinispan.marshall.core.MarshalledEntryFactory;
 import org.infinispan.persistence.spi.CacheLoader;
 import org.infinispan.persistence.spi.InitializationContext;
+import org.infinispan.protostream.SerializationContext;
 import org.kohsuke.MetaInfServices;
 
 @MetaInfServices
 @ConfiguredBy(CustomStoreConfiguration.class)
 public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
 
+    ByteBufferFactory byteBufferFactory;
+    MarshalledEntryFactory marshalledEntryFactory;
     CustomStoreConfiguration config;
    
     @Override
@@ -26,6 +31,8 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
          * - a MarshalledEntryFactory which needs to be used to construct entries from the data retrieved by the loader 
          */
         config = ctx.getConfiguration();
+        byteBufferFactory = ctx.getByteBufferFactory();
+        marshalledEntryFactory = ctx.getMarshalledEntryFactory();
     }
 
     @Override
