@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.infinispan.commons.CacheException;
 import org.infinispan.commons.configuration.ConfiguredBy;
 import org.infinispan.commons.io.ByteBufferFactory;
+import org.infinispan.commons.marshall.WrappedByteArray;
 import org.infinispan.marshall.core.MarshalledEntry;
 import org.infinispan.marshall.core.MarshalledEntryFactory;
 import org.infinispan.persistence.spi.CacheLoader;
@@ -14,6 +15,7 @@ import org.infinispan.protostream.ProtobufUtil;
 import org.infinispan.protostream.SerializationContext;
 import org.kohsuke.MetaInfServices;
 
+import test.domain.Person;
 import test.domain.PersonMarshaller;
 
 @MetaInfServices
@@ -88,8 +90,6 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
         return false;
     }
 
-    
-
     @Override
     public MarshalledEntry<K, V> load(Object key) {
        /*
@@ -110,7 +110,24 @@ public class CustomCacheLoader<K,V> implements CacheLoader<K, V> {
         * If the loader needs to have knowledge of the key/value data beyond their binary representation, then it needs access to the key's and value's
         * classes and the marshaller used to encode them.
         */
-        return null;
+        byte[] keyBytes = ((WrappedByteArray) key).getBytes();
+        // The key will be in serialized form, so we need to deserialize it to store in the Person
+        Long id;
+        try {
+            id = ProtobufUtil.fromWrappedByteArray(ctx, keyBytes);
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+        // This would be where the code to talk to a database etc to retrieve the user object instance
+        Person loadedPerson = new Person(id, config.name(), config.age());
+
+        byte[] valueBytes;
+        try {
+            valueBytes = ProtobufUtil.toWrappedByteArray(ctx, loadedPerson);
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+        return marshalledEntryFactory.newMarshalledEntry(keyBytes, valueBytes, null);
     }
 
 }

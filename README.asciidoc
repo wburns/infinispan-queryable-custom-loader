@@ -356,3 +356,36 @@ user object to the proper storage format.
 ----
 +
 NOTE: We have to pass the ClassLoader of the CustomCacheLoader so it can access all the classes in the custom loader jar.
++
+. Implement the actual CacheLoader methods
++
+In this step we will just be implementing the `load` method as an example.
+The concepts of it can be applied to all the other methods though.
++
+.CustomCacheLoader.java
+[source,java]
+----
+    @Override
+    public MarshalledEntry<K, V> load(Object key) {
+        byte[] keyBytes = ((WrappedByteArray) key).getBytes();
+        // The key will be in serialized form, so we need to deserialize it to store in the Person
+        Long id;
+        try {
+            id = ProtobufUtil.fromWrappedByteArray(ctx, keyBytes);
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+        // This would be where the code to talk to a database etc to retrieve the user object instance
+        Person loadedPerson = new Person(id, config.name(), config.age());
+
+        byte[] valueBytes;
+        try {
+            valueBytes = ProtobufUtil.toWrappedByteArray(ctx, loadedPerson);
+        } catch (IOException e) {
+            throw new CacheException(e);
+        }
+        return marshalledEntryFactory.newMarshalledEntry(keyBytes, valueBytes, null);
+    }
+----
++
+With that done, the loader should be ready to go!
